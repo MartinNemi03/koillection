@@ -33,10 +33,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CollectionRepository::class)]
 #[ORM\Table(name: 'koi_collection')]
-#[ORM\Index(name: 'idx_collection_final_visibility', columns: ['final_visibility'])]
+#[ORM\Index(columns: ['final_visibility'],
+    name: 'idx_collection_final_visibility')]
 #[ApiResource(
-    denormalizationContext: ['groups' => ['collection:write']],
-    normalizationContext: ['groups' => ['collection:read']],
     operations: [
         new Get(),
         new Put(),
@@ -44,13 +43,42 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new GetCollection(),
         new Post(),
-        new Post(uriTemplate: '/collections/{id}/image', denormalizationContext: ['groups' => ['collection:image']], inputFormats: ['multipart' => ['multipart/form-data']], openapiContext: ['summary' => 'Upload the Collection image.'])
-    ]
+        new Post(uriTemplate: '/collections/{id}/image',
+            inputFormats: ['multipart' => ['multipart/form-data']],
+            openapiContext: ['summary' => 'Upload the Collection image.'],
+            denormalizationContext: ['groups' => ['collection:image']])
+    ],
+    normalizationContext: ['groups' => ['collection:read']],
+    denormalizationContext: ['groups' => ['collection:write']]
 )]
-#[ApiResource(uriTemplate: '/collections/{id}/children', uriVariables: ['id' => new Link(fromClass: Collection::class, fromProperty: 'children')], normalizationContext: ['groups' => ['collection:read']], operations: [new GetCollection()])]
-#[ApiResource(uriTemplate: '/collections/{id}/parent', uriVariables: ['id' => new Link(fromClass: Collection::class, fromProperty: 'parent')], normalizationContext: ['groups' => ['collection:read']], operations: [new Get()])]
-#[ApiResource(uriTemplate: '/data/{id}/collection', uriVariables: ['id' => new Link(fromClass: Datum::class, fromProperty: 'collection')], normalizationContext: ['groups' => ['collection:read']], operations: [new Get()])]
-#[ApiResource(uriTemplate: '/items/{id}/collection', uriVariables: ['id' => new Link(fromClass: Item::class, fromProperty: 'collection')], normalizationContext: ['groups' => ['collection:read']], operations: [new Get()])]
+#[ApiResource(uriTemplate: '/collections/{id}/children',
+    operations: [new GetCollection()],
+    uriVariables: ['id' => new Link(
+        fromProperty: 'children',
+        fromClass: Collection::class
+    )],
+    normalizationContext: ['groups' => ['collection:read']])]
+#[ApiResource(uriTemplate: '/collections/{id}/parent',
+    operations: [new Get()],
+    uriVariables: ['id' => new Link(
+        fromProperty: 'parent',
+        fromClass: Collection::class
+    )],
+    normalizationContext: ['groups' => ['collection:read']])]
+#[ApiResource(uriTemplate: '/data/{id}/collection',
+    operations: [new Get()],
+    uriVariables: ['id' => new Link(
+        fromProperty: 'collection',
+        fromClass: Datum::class
+    )],
+    normalizationContext: ['groups' => ['collection:read']])]
+#[ApiResource(uriTemplate: '/items/{id}/collection',
+    operations: [new Get()],
+    uriVariables: ['id' => new Link(
+        fromProperty: 'collection',
+        fromClass: Item::class
+    )],
+    normalizationContext: ['groups' => ['collection:read']])]
 class Collection implements LoggableInterface, BreadcrumbableInterface, CacheableInterface, \Stringable
 {
     #[ORM\Id]
@@ -64,46 +92,66 @@ class Collection implements LoggableInterface, BreadcrumbableInterface, Cacheabl
     private ?string $title = null;
 
     #[ApiProperty(readableLink: false, writableLink: false)]
-    #[ORM\OneToMany(targetEntity: Collection::class, mappedBy: 'parent', cascade: ['all'])]
+    #[ORM\OneToMany(mappedBy: 'parent',
+        targetEntity: Collection::class,
+        cascade: ['all'])]
     #[ORM\OrderBy(['title' => Criteria::ASC])]
     private DoctrineCollection $children;
 
-    #[ApiProperty(readableLink: false, writableLink: false)]
-    #[ORM\OneToOne(targetEntity: DisplayConfiguration::class, cascade: ['all'])]
+    #[ApiProperty(readableLink: false,
+        writableLink: false)]
+    #[ORM\OneToOne(targetEntity: DisplayConfiguration::class,
+        cascade: ['all'])]
     private DisplayConfiguration $childrenDisplayConfiguration;
 
-    #[ApiProperty(readableLink: false, writableLink: false)]
-    #[ORM\ManyToOne(targetEntity: Collection::class, inversedBy: 'children')]
+    #[ApiProperty(readableLink: false,
+        writableLink: false)]
+    #[ORM\ManyToOne(targetEntity: Collection::class,
+        inversedBy: 'children')]
     #[Groups(['collection:read', 'collection:write'])]
     private ?Collection $parent = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'collections')]
+    #[ORM\ManyToOne(targetEntity: User::class,
+        inversedBy: 'collections')]
     #[Groups(['collection:read'])]
     private ?User $owner = null;
 
-    #[ORM\OneToMany(targetEntity: Item::class, mappedBy: 'collection', cascade: ['all'])]
+    #[ORM\OneToMany(mappedBy: 'collection',
+        targetEntity: Item::class,
+        cascade: ['all'])]
     private DoctrineCollection $items;
 
-    #[ApiProperty(readableLink: false, writableLink: false)]
-    #[ORM\OneToOne(targetEntity: DisplayConfiguration::class, cascade: ['all'])]
+    #[ApiProperty(readableLink: false,
+        writableLink: false)]
+    #[ORM\OneToOne(targetEntity: DisplayConfiguration::class,
+        cascade: ['all'])]
     private DisplayConfiguration $itemsDisplayConfiguration;
 
-    #[ORM\OneToMany(targetEntity: Datum::class, mappedBy: 'collection', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'collection',
+        targetEntity: Datum::class,
+        cascade: ['persist'],
+        orphanRemoval: true)]
     #[ORM\OrderBy(['position' => Criteria::ASC])]
     #[AppAssert\UniqueDatumLabel]
     private DoctrineCollection $data;
 
-    #[ORM\Column(type: Types::STRING, length: 6)]
+    #[ORM\Column(type: Types::STRING,
+        length: 6)]
     #[Groups(['collection:read'])]
     private ?string $color = null;
 
-    #[Upload(pathProperty: 'image', deleteProperty: 'deleteImage', maxWidth: 200, maxHeight: 200)]
-    #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'], groups: ['colletion:image'])]
-    #[AppAssert\HasEnoughSpaceForUpload]
+    #[Upload(pathProperty: 'image',
+        deleteProperty: 'deleteImage',
+        maxWidth: 200,
+        maxHeight: 200)]
+    #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
+        groups: ['colletion:image'])]
     #[Groups(['collection:write', 'collection:image'])]
     private ?File $file = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true, unique: true)]
+    #[ORM\Column(type: Types::STRING,
+        unique: true,
+        nullable: true)]
     #[Groups(['collection:read'])]
     private ?string $image = null;
 
@@ -123,20 +171,25 @@ class Collection implements LoggableInterface, BreadcrumbableInterface, Cacheabl
     #[Groups(['collection:read', 'collection:write'])]
     private ?Template $itemsDefaultTemplate = null;
 
-    #[ORM\Column(type: Types::STRING, length: 10)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10)]
     #[Groups(['collection:read', 'collection:write'])]
     #[Assert\Choice(choices: VisibilityEnum::VISIBILITIES)]
     private string $visibility = VisibilityEnum::VISIBILITY_PUBLIC;
 
-    #[ORM\Column(type: Types::STRING, length: 10, nullable: true)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10,
+        nullable: true)]
     #[Groups(['collection:read'])]
     private ?string $parentVisibility = null;
 
-    #[ORM\Column(type: Types::STRING, length: 10)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10)]
     #[Groups(['collection:read'])]
     private ?string $finalVisibility = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT,
+        nullable: true)]
     #[Groups(['collection:read'])]
     private ?string $scrapedFromUrl = null;
 
@@ -144,7 +197,8 @@ class Collection implements LoggableInterface, BreadcrumbableInterface, Cacheabl
     #[Groups(['collection:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE,
+        nullable: true)]
     #[Groups(['collection:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 

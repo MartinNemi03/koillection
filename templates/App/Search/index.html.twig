@@ -56,7 +56,10 @@
                     <li class="tab s12 l2" data-tabs-target="tab" data-action="click->tabs#display" data-for="tags">
                         {{ 'label.tags'|trans }} ({{ results.tags is defined ? results.tags|length : 0 }})
                     </li>
-                    <li class="tab s12 l2" data-tabs-target="tab" data-action="click->tabs#display" data-for="wishlists">
+                    <li class="tab col s12 l2" data-tabs-target="tab" data-action="click->tabs#display" data-for="wishes">
+                        {{ 'label.wishlists'|trans }} ({{ results.wishes is defined ? results.wishes|length : 0 }})
+                    </li>
+                    <li class="tab col s12 l2" data-tabs-target="tab" data-action="click->tabs#display" data-for="wishlists">
                         {{ 'label.wishlists'|trans }} ({{ results.wishlists is defined ? results.wishlists|length : 0 }})
                     </li>
                     <li class="tab s12 l2" data-tabs-target="tab" data-action="click->tabs#display" data-for="albums">
@@ -125,6 +128,14 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="panel" data-tabs-target="panel" data-name="wishes">
+            {% if results.wishes is defined and results.wishes|length > 0 %}
+                <div class="block-element">
+                    {{ include('App/Wishlist/_wishes_list.html.twig', {'wishes': results.wishes}) }}
                 </div>
             {% endif %}
         </div>

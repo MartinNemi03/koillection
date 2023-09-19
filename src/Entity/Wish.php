@@ -28,7 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: WishRepository::class)]
 #[ORM\Table(name: 'koi_wish')]
-#[ORM\Index(name: 'idx_wish_final_visibility', columns: ['final_visibility'])]
+#[ORM\Index(columns: ['final_visibility'],
+    name: 'idx_wish_final_visibility')]
 #[ApiResource(
     operations: [
         new Get(),
@@ -37,15 +38,25 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new GetCollection(),
         new Post(),
-        new Post(uriTemplate: '/wishes/{id}/image', denormalizationContext: ['groups' => ['wish:image']], inputFormats: ['multipart' => ['multipart/form-data']], openapiContext: ['summary' => 'Upload the Wish image.']),
-    ], denormalizationContext: ['groups' => ['wish:write']],
-    normalizationContext: ['groups' => ['wish:read']]
+        new Post(uriTemplate: '/wishes/{id}/image',
+            inputFormats: ['multipart' => ['multipart/form-data']],
+            openapiContext: ['summary' => 'Upload the Wish image.'],
+            denormalizationContext: ['groups' => ['wish:image']]),
+    ],
+    normalizationContext: ['groups' => ['wish:read']],
+    denormalizationContext: ['groups' => ['wish:write']]
 )]
-#[ApiResource(uriTemplate: '/wishlists/{id}/wishes', uriVariables: ['id' => new Link(fromClass: Wishlist::class, fromProperty: 'wishes')], normalizationContext: ['groups' => ['wish:read']], operations: [new GetCollection()])]
+#[ApiResource(uriTemplate: '/wishlists/{id}/wishes',
+    operations: [new GetCollection()],
+    uriVariables: ['id' => new Link(fromProperty: 'wishes', fromClass: Wishlist::class)],
+    normalizationContext: ['groups' => ['wish:read']])]
 class Wish implements CacheableInterface, LoggableInterface, \Stringable
 {
     #[ORM\Id]
-    #[ORM\Column(type: Types::STRING, length: 36, unique: true, options: ['fixed' => true])]
+    #[ORM\Column(type: Types::STRING,
+        length: 36,
+        unique: true,
+        options: ['fixed' => true])]
     #[Groups(['wish:read'])]
     private string $id;
 
@@ -54,20 +65,25 @@ class Wish implements CacheableInterface, LoggableInterface, \Stringable
     #[Assert\NotBlank]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT,
+        nullable: true)]
     #[Groups(['wish:read', 'wish:write'])]
     private ?string $url = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[ORM\Column(type: Types::STRING,
+        nullable: true)]
     #[Groups(['wish:read', 'wish:write'])]
     private ?string $price = null;
 
-    #[ORM\Column(type: Types::STRING, length: 6, nullable: true)]
+    #[ORM\Column(type: Types::STRING,
+        length: 6,
+        nullable: true)]
     #[Groups(['wish:read', 'wish:write'])]
     #[Assert\Currency]
     private ?string $currency = null;
 
-    #[ORM\ManyToOne(targetEntity: Wishlist::class, inversedBy: 'wishes')]
+    #[ORM\ManyToOne(targetEntity: Wishlist::class,
+        inversedBy: 'wishes')]
     #[Assert\NotBlank]
     #[Groups(['wish:read', 'wish:write'])]
     private ?Wishlist $wishlist = null;
@@ -76,34 +92,44 @@ class Wish implements CacheableInterface, LoggableInterface, \Stringable
     #[Groups(['wish:read'])]
     private ?User $owner = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT,
+        nullable: true)]
     #[Groups(['wish:read', 'wish:write'])]
     private ?string $comment = null;
 
-    #[Upload(pathProperty: 'image', smallThumbnailPathProperty: 'imageSmallThumbnail')]
-    #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'], groups: ['wish:image'])]
-    #[AppAssert\HasEnoughSpaceForUpload]
+    #[Upload(pathProperty: 'image',
+        smallThumbnailPathProperty: 'imageSmallThumbnail')]
+    #[Assert\Image(mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
+        groups: ['wish:image'])]
     #[Groups(['wish:write', 'wish:image'])]
     private ?File $file = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true, unique: true)]
+    #[ORM\Column(type: Types::STRING,
+        unique: true,
+        nullable: true)]
     #[Groups(['wish:read'])]
     private ?string $image = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true, unique: true)]
+    #[ORM\Column(type: Types::STRING,
+        unique: true,
+        nullable: true)]
     #[Groups(['wish:read'])]
     private ?string $imageSmallThumbnail = null;
 
-    #[ORM\Column(type: Types::STRING, length: 10)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10)]
     #[Groups(['wish:read', 'wish:write'])]
     #[Assert\Choice(choices: VisibilityEnum::VISIBILITIES)]
     private string $visibility = VisibilityEnum::VISIBILITY_PUBLIC;
 
-    #[ORM\Column(type: Types::STRING, length: 10, nullable: true)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10,
+        nullable: true)]
     #[Groups(['wish:read'])]
     private ?string $parentVisibility = null;
 
-    #[ORM\Column(type: Types::STRING, length: 10)]
+    #[ORM\Column(type: Types::STRING,
+        length: 10)]
     #[Groups(['wish:read'])]
     private ?string $finalVisibility = null;
 
@@ -115,7 +141,8 @@ class Wish implements CacheableInterface, LoggableInterface, \Stringable
     #[Groups(['wish:read'])]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE,
+        nullable: true)]
     #[Groups(['wish:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 

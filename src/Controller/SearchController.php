@@ -11,6 +11,7 @@ use App\Repository\CollectionRepository;
 use App\Repository\ItemRepository;
 use App\Repository\TagRepository;
 use App\Repository\WishlistRepository;
+use App\Repository\WishRepository;
 use App\Service\Autocompleter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class SearchController extends AbstractController
         ItemRepository $itemRepository,
         TagRepository $tagRepository,
         AlbumRepository $albumRepository,
+        WishRepository $wishRepository,
         WishlistRepository $wishlistRepository
     ): Response {
         $results = [];
@@ -51,6 +53,7 @@ class SearchController extends AbstractController
 
             if ($this->featureChecker->isFeatureEnabled('wishlists')) {
                 $results['wishlists'] = $wishlistRepository->findForSearch($search);
+                $results['wishes'] = $wishRepository->findForSearch($search);
             }
         }
 

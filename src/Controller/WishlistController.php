@@ -18,8 +18,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WishlistController extends AbstractController
 {
-    #[Route(path: '/wishlists', name: 'app_wishlist_index', methods: ['GET'])]
-    #[Route(path: '/user/{username}/wishlists', name: 'app_shared_wishlist_index', methods: ['GET'])]
+    #[Route(path: '/wishlists',
+        name: 'app_wishlist_index',
+        methods: ['GET'])]
+    #[Route(path: '/user/{username}/wishlists',
+        name: 'app_shared_wishlist_index',
+        methods: ['GET'])]
     public function index(WishlistRepository $wishlistRepository): Response
     {
         $this->denyAccessUnlessFeaturesEnabled(['wishlists']);
@@ -40,7 +44,9 @@ class WishlistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/wishlists/edit', name: 'app_wishlist_edit_index', methods: ['GET', 'POST'])]
+    #[Route(path: '/wishlists/edit',
+        name: 'app_wishlist_edit_index',
+        methods: ['GET', 'POST'])]
     public function editIndex(
         Request $request,
         TranslatorInterface $translator,
@@ -60,9 +66,15 @@ class WishlistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/wishlists/add', name: 'app_wishlist_add', methods: ['GET', 'POST'])]
-    public function add(Request $request, WishlistRepository $wishlistRepository, TranslatorInterface $translator, ManagerRegistry $managerRegistry): Response
-    {
+    #[Route(path: '/wishlists/add',
+        name: 'app_wishlist_add',
+        methods: ['GET', 'POST'])]
+    public function add(
+        Request $request,
+        WishlistRepository $wishlistRepository,
+        TranslatorInterface $translator,
+        ManagerRegistry $managerRegistry
+    ): Response {
         $this->denyAccessUnlessFeaturesEnabled(['wishlists']);
 
         $wishlist = new Wishlist();
@@ -95,10 +107,17 @@ class WishlistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/wishlists/{id}', name: 'app_wishlist_show', methods: ['GET'])]
-    #[Route(path: '/user/{username}/wishlists/{id}', name: 'app_shared_wishlist_show', methods: ['GET'])]
-    public function show(Wishlist $wishlist, WishlistRepository $wishlistRepository, WishRepository $wishRepository): Response
-    {
+    #[Route(path: '/wishlists/{id}',
+        name: 'app_wishlist_show',
+        methods: ['GET'])]
+    #[Route(path: '/user/{username}/wishlists/{id}',
+        name: 'app_shared_wishlist_show',
+        methods: ['GET'])]
+    public function show(
+        Wishlist $wishlist,
+        WishlistRepository $wishlistRepository,
+        WishRepository $wishRepository
+    ): Response {
         $this->denyAccessUnlessFeaturesEnabled(['wishlists']);
 
         return $this->render('App/Wishlist/show.html.twig', [
@@ -108,9 +127,15 @@ class WishlistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/wishlists/{id}/edit', name: 'app_wishlist_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Wishlist $wishlist, TranslatorInterface $translator, ManagerRegistry $managerRegistry): Response
-    {
+    #[Route(path: '/wishlists/{id}/edit',
+        name: 'app_wishlist_edit',
+        methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        Wishlist $wishlist,
+        TranslatorInterface $translator,
+        ManagerRegistry $managerRegistry
+    ): Response {
         $this->denyAccessUnlessFeaturesEnabled(['wishlists']);
 
         $form = $this->createForm(WishlistType::class, $wishlist);
@@ -129,9 +154,15 @@ class WishlistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/wishlists/{id}/delete', name: 'app_wishlist_delete', methods: ['POST'])]
-    public function delete(Request $request, Wishlist $wishlist, TranslatorInterface $translator, ManagerRegistry $managerRegistry): Response
-    {
+    #[Route(path: '/wishlists/{id}/delete',
+        name: 'app_wishlist_delete',
+        methods: ['POST'])]
+    public function delete(
+        Request $request,
+        Wishlist $wishlist,
+        TranslatorInterface $translator,
+        ManagerRegistry $managerRegistry
+    ): Response {
         $this->denyAccessUnlessFeaturesEnabled(['wishlists']);
 
         $form = $this->createDeleteForm('app_wish_delete', $wishlist);

@@ -20,8 +20,8 @@ class WishlistRepository extends ServiceEntityRepository
     public function findAll(): array
     {
         return $this
-            ->createQueryBuilder('w')
-            ->orderBy('w.name', Criteria::ASC)
+            ->createQueryBuilder('wl')
+            ->orderBy('wl.name', Criteria::ASC)
             ->getQuery()
             ->getResult()
         ;
@@ -37,9 +37,9 @@ class WishlistRepository extends ServiceEntityRepository
         $excludedWishlists[] = $wishlist->getId();
 
         return $this
-            ->createQueryBuilder('w')
-            ->orderBy('w.name', Criteria::ASC)
-            ->where('w NOT IN (:excludedWishlists)')
+            ->createQueryBuilder('wl')
+            ->orderBy('wl.name', Criteria::ASC)
+            ->where('wl NOT IN (:excludedWishlists)')
             ->setParameter('excludedWishlists', $excludedWishlists)
             ->getQuery()
             ->getResult()
@@ -49,21 +49,21 @@ class WishlistRepository extends ServiceEntityRepository
     public function findForSearch(Search $search): array
     {
         $qb = $this
-            ->createQueryBuilder('w')
-            ->orderBy('w.name', Criteria::ASC)
+            ->createQueryBuilder('wl')
+            ->orderBy('wl.name', Criteria::ASC)
         ;
 
         if (\is_string($search->getTerm()) && $search->getTerm() !== '') {
             $qb
-                ->andWhere('LOWER(w.name) LIKE LOWER(:term)')
-                ->setParameter('term', '%' . $search->getTerm() . '%')
+                ->andWhere('LOWER(wl.name) LIKE LOWER(:term)')
+                ->setParameter('term', '%'.$search->getTerm().'%')
             ;
         }
 
         if ($search->getCreatedAt() instanceof \DateTimeImmutable) {
             $createdAt = $search->getCreatedAt();
             $qb
-                ->andWhere('w.createdAt BETWEEN :start AND :end')
+                ->andWhere('wl.createdAt BETWEEN :start AND :end')
                 ->setParameter('start', $createdAt->setTime(0, 0, 0))
                 ->setParameter('end', $createdAt->setTime(23, 59, 59))
             ;

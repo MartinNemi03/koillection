@@ -31,16 +31,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'koi_user')]
-#[ORM\Index(name: 'idx_user_visibility', columns: ['visibility'])]
-#[UniqueEntity(fields: ['email'], message: 'error.email.not_unique')]
-#[UniqueEntity(fields: ['username'], message: 'error.username.not_unique')]
+#[ORM\Index(columns: ['visibility'],
+    name: 'idx_user_visibility')]
+#[UniqueEntity(fields: ['email'],
+    message: 'error.email.not_unique')]
+#[UniqueEntity(fields: ['username'],
+    message: 'error.username.not_unique')]
 #[ApiResource(
     operations: [
         new Get(),
         new GetCollection()
     ],
-    denormalizationContext: ['groups' => ['user:write']],
-    normalizationContext: ['groups' => ['user:read']]
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, BreadcrumbableInterface, \Stringable
 {
@@ -72,7 +75,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Breadcr
     #[Groups(['user:write', 'user:image'])]
     private ?File $file = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true, unique: true)]
+    #[ORM\Column(type: Types::STRING, unique: true, nullable: true)]
     #[Groups(['user:read'])]
     private ?string $avatar = null;
 
@@ -126,31 +129,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Breadcr
     #[ORM\OneToOne(targetEntity: DisplayConfiguration::class, cascade: ['all'], orphanRemoval: true)]
     private ?DisplayConfiguration $albumsDisplayConfiguration = null;
 
-    #[ORM\OneToMany(targetEntity: Collection::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Collection::class,
+        cascade: ['remove'])]
     private DoctrineCollection $collections;
 
-    #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Tag::class,
+        cascade: ['remove'])]
     private DoctrineCollection $tags;
 
-    #[ORM\OneToMany(targetEntity: TagCategory::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: TagCategory::class,
+        cascade: ['remove'])]
     private DoctrineCollection $tagCategories;
 
-    #[ORM\OneToMany(targetEntity: Wishlist::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Wishlist::class,
+        cascade: ['remove'])]
     private DoctrineCollection $wishlists;
 
-    #[ORM\OneToMany(targetEntity: Template::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Template::class,
+        cascade: ['remove'])]
     private DoctrineCollection $templates;
 
-    #[ORM\OneToMany(targetEntity: Log::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Log::class,
+        cascade: ['remove'])]
     private DoctrineCollection $logs;
 
-    #[ORM\OneToMany(targetEntity: Album::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Album::class,
+        cascade: ['remove'])]
     private DoctrineCollection $albums;
 
-    #[ORM\OneToMany(targetEntity: Inventory::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Inventory::class,
+        cascade: ['remove'])]
     private DoctrineCollection $inventories;
 
-    #[ORM\OneToMany(targetEntity: Scraper::class, mappedBy: 'owner', cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'owner',
+        targetEntity: Scraper::class,
+        cascade: ['remove'])]
     private DoctrineCollection $scrapers;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
