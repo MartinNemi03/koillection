@@ -28,7 +28,10 @@
                 </td>
                 <td>
                     {% if wish.url is not null %}
-                        <a href="{{ wish.url }}" target="_blank">{{ wish.name }}</a>
+                        <a href="{{ wish.url }}" target="_blank">{{ wish.name }}</a><br>
+                        {% if showWishlistName %}
+                            <small>{{ wish.getWishlist().getName() }}</small>
+                        {% endif %}
                     {% else %}
                         {{ wish.name }}
                     {% endif %}

@@ -135,7 +135,13 @@
         <div class="panel" data-tabs-target="panel" data-name="wishes">
             {% if results.wishes is defined and results.wishes|length > 0 %}
                 <div class="block-element">
-                    {{ include('App/Wishlist/_wishes_list.html.twig', {'wishes': results.wishes}) }}
+                    {{
+                        include('App/Wishlist/_wishes_list.html.twig',
+                            {
+                                'wishes': results.wishes,
+                                'showWishlistName': true
+                            })
+                    }}
                 </div>
             {% endif %}
         </div>
